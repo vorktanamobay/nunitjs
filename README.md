@@ -81,8 +81,7 @@ AssertionError: this assertion should fail
     at FixtureRunner.runNextTest (/path/to/project/nunit.js:347:20)
     at /path/to/project/nunit.js:354:13
     at /path/to/project/nunit.js:452:21]]></failure>
-    </testcase>
-        </testCase>
+        </testcase>
     </file>
 </unitTest>
 ```
