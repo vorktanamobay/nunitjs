@@ -38,7 +38,7 @@ When run, this will output the following xml report:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="fixtures.sample_fixture" time="0.006" tests="2" failures="1">
-    <testcase name="testSomething" time="0"/>
+    <testcase name="testSomething" time="0.001"/>
     <testcase name="testSomethingElse" time="0.162">
         <failure message="this assertion should fail" type="AssertionError"><![CDATA[actual: false
 expected: true
@@ -57,6 +57,34 @@ AssertionError: this assertion should fail
     </testcase>
 </testsuite>
 
+```
+
+It will also generate the following sonar xml report
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<unitTest version="1">
+    <file path="project/fixtures/sample_fixture.js">
+        <testCase name="testSomething" duration="1"/>
+        <testCase name="testSomethingElse" duration="162">
+            <failure message="this assertion should fail"><![CDATA[actual: false
+expected: true
+operator: ==
+AssertionError: this assertion should fail
+    at Object.exports.testSomethingElse (/path/to/project/fixtures/sample_fixture.js:9:12)
+    at Context.startDelegate (/path/to/project/nunit.js:501:29)
+    at Context.start (/path/to/project/nunit.js:608:18)
+    at runTest (/path/to/project/nunit.js:542:17)
+    at /path/to/project/nunit.js:450:13
+    at setUp (/path/to/project/nunit.js:468:13)
+    at TestRunner.run (/path/to/project/nunit.js:449:9)
+    at FixtureRunner.runNextTest (/path/to/project/nunit.js:347:20)
+    at /path/to/project/nunit.js:354:13
+    at /path/to/project/nunit.js:452:21]]></failure>
+    </testcase>
+        </testCase>
+    </file>
+</unitTest>
 ```
 
 

@@ -25,6 +25,8 @@ var UNIT_TEST = {
     "file":[]
 };
 
+var TEST_SUITE = [];
+
 /********************** main ****************************/
 exports.run = function (args) {
     var argumentParser = new ArgumentParser();
@@ -488,24 +490,20 @@ function TestRunner(reporter, module, testName, testsuite, unitTest) {
     this.unitTest = unitTest;
 
 
-    this.duration = 0;
-
     this.run = function(done){
-        self.duration = new Date().getMilliseconds();
+        
         setUp(done, function(){
+            var now = new Date().getMilliseconds();
+            self.testcase["@"].time = now;
+            self.testCase["@"].duration = now;
             runTest(self, done, function(){
                 tearDown(done, function(){
                     done(true);
                 });
             },function(){
-                self.durtation = new Date().getMilliseconds() - self.duration;
-                if(self.testsuite && self.testsuite.testcase !== undefined){
-                    self.testcase["@"].time = self.duration/1000.0;
-                }
-                if(self.unitTest && self.unitTest.testCase !== undefined){
-                    self.testCase["@"].duration = self.duration;
-                }
-
+                var duration = new Date().getMilliseconds();
+                self.testcase["@"].time = (duration - self.testcase["@"].time)/1000.0;
+                self.testCase["@"].duration = duration - self.testCase["@"].duration;
             });
         });
 
@@ -731,23 +729,14 @@ function Reporter(verbose) {
 
     this.fixtureDone = function (fixture, result) {
 
-        UNIT_TEST.file.push(this.unitTest);
         this.testsuite["@"].time = result.duration / 1000.0;
+
         this.testsuite["@"].tests = result.total;
         this.testsuite["@"].failures = result.failed;
-        var options = {useCDATA:true};
-        var report = js2xmlparser("testsuite",this.testsuite,options);
 
-        fs.writeFile(REPORTS_PATH +"/TEST-"+ this.testsuite["@"].name + ".xml", report, function(err){
-            if(err){
-                return console.log(err);
+        TEST_SUITE.push(this.testsuite);
 
-            }
-        });
-
-
-
-
+        UNIT_TEST.file.push(this.unitTest);
 
         console.log('\n\n' + "------ Fixture end ----------------------");
         console.log(result.total + ' tests, ' + result.passed + ' passed, ' + result.failed + ' failed, took ' + result.duration + 'ms.');
@@ -756,17 +745,36 @@ function Reporter(verbose) {
 
     this.done = function (result) {
 
-        var options = {useCDATA:true};
-        var report = js2xmlparser( "unitTest",UNIT_TEST,options);
+        setTimeout(function(){
+            var suites = TEST_SUITE;
 
-        fs.writeFile(SONAR_REPORTS_PATH+"/report.xml", report, function(err){
-            if(err){
-                return console.log(err);
+            var options = {useCDATA:true};
 
+            for(var i = 0; i < suites.length; i++){
+                var testsuite = suites[i];
+                var suiteXml = js2xmlparser("testsuite",testsuite,options);
+
+                fs.writeFile(REPORTS_PATH +"/TEST-"+ testsuite["@"].name + ".xml", suiteXml, function(err){
+                    if(err){
+                        return console.log(err);
+
+                    }
+                });
             }
-        });
 
-        console.log('\n\n' + '========== Total: ' + result.total + ' tests, ' + result.passed + ' passed, ' + result.failed + ' failed, took ' + result.duration + 'ms.  ==========\n\n');
+
+            var report = js2xmlparser( "unitTest",UNIT_TEST,options);
+
+            fs.writeFile(SONAR_REPORTS_PATH+"/report.xml", report, function(err){
+                if(err){
+                    return console.log(err);
+
+                }
+            });
+
+            console.log('\n\n' + '========== Total: ' + result.total + ' tests, ' + result.passed + ' passed, ' + result.failed + ' failed, took ' + result.duration + 'ms.  ==========\n\n');
+        }, 1000);
+
     };
 }
 
