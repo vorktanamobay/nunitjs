@@ -125,6 +125,12 @@ Path where to generate SonarQube reports. Defaults to sonar-reports.
 
     node nunit.js --sonar-reports-path=reportfolder
 
+--base-dir=[path]
+
+Path to project working directory. Defaults to src/test/js. This assumes that nunit.js in in src/test/js and fixtures are under src/test/js/fixtures.
+
+    node nunit.js --base-dir=testdir
+
 --verbose
 
 print passed tests too
